@@ -3,6 +3,7 @@
 Status: WIP
 
 - [x] Feature Complete
+- [ ] Setup CI
 - [ ] Add tests
 - [ ] Documentation
 
