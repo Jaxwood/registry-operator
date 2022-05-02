@@ -18,18 +18,24 @@ package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+var SchemeGroupVersion = schema.GroupVersion{Group: "apps.jaxwood.com", Version: "v1"}
+
 // RegistrySecretSpec defines the desired state of RegistrySecret
 type RegistrySecretSpec struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// ImagePullSecretName is the name of the image pull secret to sync across namespaces
 	ImagePullSecretName string `json:"imagePullSecretName"`
+	ImagePullSecretKey  string `json:"imagePullSecretKey"`
 }
 
 // RegistrySecretStatus defines the observed state of RegistrySecret
