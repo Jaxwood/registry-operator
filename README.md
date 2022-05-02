@@ -2,6 +2,10 @@
 
 Status: WIP
 
+- [x] Feature Complete
+- [ ] Add tests
+- [ ] Documentation
+
 An operator that will automatically sync an image pull secret across namespaces.
 
 The operator listen on newly created namespaces/CRD and will automatically add/update the image pull secret to the namespace if missing/updated. This is useful incase secret rotation is needed.
@@ -15,5 +19,6 @@ metadata:
   name: image-pull-secret
   namespace: default
 spec:
-  imagePullSecretName: regcred-dev
+  imagePullSecretName: "regcred-dev"
+  imagePullSecretKey: ".dockerconfigjson"
 ```
