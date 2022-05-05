@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	types "k8s.io/apimachinery/pkg/types"
 
 	registryappsv1 "github.com/jaxwood/registry-operator/api/v1"
 )
@@ -44,6 +45,20 @@ var _ = Describe("RegistrySecret controller", func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, registry)).Should(Succeed())
+			registrySecretLookupKey := types.NamespacedName{Name: RegistrySecretName, Namespace: RegistrySecretNamespace}
+			createdRegistrySecret := &registryappsv1.RegistrySecret{}
+
+			// We'll need to retry getting this newly created CronJob, given that creation may not immediately happen.
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, registrySecretLookupKey, createdRegistrySecret)
+				if err != nil {
+					return false
+				}
+				return true
+			}, timeout, interval).Should(BeTrue())
+
+			Expect(createdRegistrySecret.Spec.ImagePullSecretName).Should(Equal("regcred-dev"))
+			Expect(createdRegistrySecret.Spec.ImagePullSecretKey).Should(Equal(".dockerconfigjson"))
 		})
 	})
 
