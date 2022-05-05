@@ -18,7 +18,7 @@ var _ = Describe("RegistrySecret controller", func() {
 	// Define utility constants for object names and testing timeouts/durations and intervals.
 	const (
 		RegistrySecretName      = "test-registrysecret"
-		RegistrySecretNamespace = "registry-operator-system"
+		RegistrySecretNamespace = "default"
 
 		timeout  = time.Second * 10
 		duration = time.Second * 10
