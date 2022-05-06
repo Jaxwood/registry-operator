@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -28,36 +27,11 @@ var _ = Describe("RegistrySecret controller", func() {
 		duration = time.Second * 10
 		interval = time.Millisecond * 250
 	)
+	RegistrySecretContent := []byte("{\"auths\":{\"registry\":{\"username\":\"foo\",\"password\":\"bar\",\"auth\":\"base64\"}}}")
 
 	Context("When updating RegistrySecret Status", func() {
 		It("Should sync image pull secret across namespaces", func() {
-			By("By create a new image pull secret")
 			ctx := context.Background()
-			testSecret := &v1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      RegistrySecretName,
-					Namespace: RegistrySecretNamespace,
-				},
-				Type: v1.SecretTypeDockerConfigJson,
-				Data: map[string][]byte{
-					v1.DockerConfigJsonKey: []byte("{\"auths\":{\"registry\":{\"username\":\"foo\",\"password\":\"bar\",\"auth\":\"base64\"}}}"),
-				},
-			}
-			Expect(k8sClient.Create(ctx, testSecret)).Should(Succeed())
-			secretLookupKey := types.NamespacedName{Name: RegistrySecretName, Namespace: RegistrySecretNamespace}
-			createdSecret := &v1.Secret{}
-
-			Eventually(func() bool {
-				err := k8sClient.Get(ctx, secretLookupKey, createdSecret)
-				if err != nil {
-					return false
-				}
-				return true
-			}, timeout, interval).Should(BeTrue())
-
-			Expect(createdSecret.Name).Should(Equal(RegistrySecretName))
-			Expect(len(createdSecret.Data[v1.DockerConfigJsonKey])).Should(Not(nil))
-
 			By("By creating a new RegistrySecret CRDs")
 			registry := &registryappsv1.RegistrySecret{
 				TypeMeta: metav1.TypeMeta{
@@ -88,6 +62,32 @@ var _ = Describe("RegistrySecret controller", func() {
 			Expect(createdRegistrySecret.Spec.ImagePullSecretName).Should(Equal(RegistrySecretName))
 			Expect(createdRegistrySecret.Spec.ImagePullSecretKey).Should(Equal(v1.DockerConfigJsonKey))
 
+			By("By create a new image pull secret")
+			testSecret := &v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      RegistrySecretName,
+					Namespace: RegistrySecretNamespace,
+				},
+				Type: v1.SecretTypeDockerConfigJson,
+				Data: map[string][]byte{
+					v1.DockerConfigJsonKey: RegistrySecretContent,
+				},
+			}
+			Expect(k8sClient.Create(ctx, testSecret)).Should(Succeed())
+			secretLookupKey := types.NamespacedName{Name: RegistrySecretName, Namespace: RegistrySecretNamespace}
+			createdSecret := &v1.Secret{}
+
+			Eventually(func() bool {
+				err := k8sClient.Get(ctx, secretLookupKey, createdSecret)
+				if err != nil {
+					return false
+				}
+				return true
+			}, timeout, interval).Should(BeTrue())
+
+			Expect(createdSecret.Name).Should(Equal(RegistrySecretName))
+			Expect(createdSecret.Data[v1.DockerConfigJsonKey]).Should(Equal(RegistrySecretContent))
+
 			By("By creating a new namespace")
 			testNamespace := &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
@@ -114,15 +114,14 @@ var _ = Describe("RegistrySecret controller", func() {
 
 			Eventually(func() bool {
 				err := k8sClient.Get(ctx, syncedSecretLookupKey, syncedCreatedSecret)
-				fmt.Fprintf(GinkgoWriter, "[DEBUG] OUTPUT LINE: %s\n", err)
 				if err != nil {
 					return false
 				}
 				return true
-			}, timeout, duration).Should(BeTrue())
+			}, timeout, interval).Should(BeTrue())
 
 			Expect(syncedCreatedSecret.Name).Should(Equal(RegistrySecretName))
-			Expect(len(syncedCreatedSecret.Data[v1.DockerConfigJsonKey])).Should(Not(nil))
+			Expect(createdSecret.Data[v1.DockerConfigJsonKey]).Should(Equal(RegistrySecretContent))
 		})
 	})
 
