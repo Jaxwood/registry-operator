@@ -1,11 +1,5 @@
 # Registry Operator
-
-Status: WIP
-
-- [x] Feature Complete
-- [ ] Setup CI
-- [x] Add tests
-- [x] Documentation
+[![CI](https://github.com/Jaxwood/registry-operator/actions/workflows/go.yml/badge.svg)](https://github.com/Jaxwood/registry-operator/actions/workflows/go.yml)
 
 An operator that will automatically sync an image pull secret across namespaces.
 
