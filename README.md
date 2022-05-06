@@ -4,8 +4,8 @@ Status: WIP
 
 - [x] Feature Complete
 - [ ] Setup CI
-- [ ] Add tests
-- [ ] Documentation
+- [x] Add tests
+- [x] Documentation
 
 An operator that will automatically sync an image pull secret across namespaces.
 
